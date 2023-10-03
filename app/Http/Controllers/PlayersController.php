@@ -7,7 +7,8 @@ use App\Models\Player;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Log;
-
+use Illuminate\Support\Facades\DB;
+        
 class PlayersController extends Controller
 {
     /**
@@ -19,7 +20,7 @@ class PlayersController extends Controller
     {
         return new Response(
             Player::query()->
-            select(['id', 'name'])->
+            select(['id', 'name','hp','mp','money'])->
             get());
     }
 
@@ -31,6 +32,12 @@ class PlayersController extends Controller
      */
     public function show($id)
     {
+        return new Response(
+
+            Player::where('id', '=', $id)->
+            select(['id','name','hp','mp','money'])->
+            get()
+        );
 
     }
 
@@ -42,7 +49,19 @@ class PlayersController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        return new Response(
+            
+            Player::query()->
+            insertGetId([
+                'id'    => $request->id,
+                'name'  => $request->name,
+                'hp'    => $request->hp,
+                'mp'    => $request->mp,
+                'money' => $request->money,
+            ])
+    
+            
+        );
     }
 
     /**
@@ -54,7 +73,14 @@ class PlayersController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        Player::where('id', '=', $id)->
+        update(['name' => $request->name,
+                'hp' =>$request->hp,
+                'mp' =>$request->mp,
+                'money' =>$request->money
+        ]);
+        
+        return response('更新した。', 200);
     }
 
     /**
@@ -65,7 +91,10 @@ class PlayersController extends Controller
      */
     public function destroy($id)
     {
-        //
+        Player::where('id', '=', $id)->
+        delete();
+
+        return response()->json($id, 200);
     }
 
     /**
@@ -73,10 +102,11 @@ class PlayersController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create()
+    public function create(Request $request)
     {
-        //
+        
     }
+
 
     /**
      * Show the form for editing the specified resource.
