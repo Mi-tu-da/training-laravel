@@ -54,7 +54,6 @@ class PlayersController extends Controller
             //情報を尋ねる処理
             Player::insertGetId([
 
-                'id'    => $request->id,
                 'name'  => $request->name,
                 'hp'    => $request->hp,
                 'mp'    => $request->mp,
