@@ -19,9 +19,11 @@ class PlayersController extends Controller
     public function index()
     {
         return new Response(
+
             Player::query()->
             select(['id', 'name','hp','mp','money'])->
-            get());
+            get()
+        );
     }
 
     /**
@@ -52,7 +54,10 @@ class PlayersController extends Controller
         return new Response(
             
             Player::query()->
+
+            //情報を尋ねる処理
             insertGetId([
+
                 'id'    => $request->id,
                 'name'  => $request->name,
                 'hp'    => $request->hp,
@@ -73,13 +78,17 @@ class PlayersController extends Controller
      */
     public function update(Request $request, $id)
     {
+        //どこにあるか調べる
         Player::where('id', '=', $id)->
+
+        //更新するために問い合わせる
         update(['name' => $request->name,
                 'hp' =>$request->hp,
                 'mp' =>$request->mp,
                 'money' =>$request->money
         ]);
         
+        //logみたいな処理
         return response('更新した。', 200);
     }
 
@@ -91,10 +100,14 @@ class PlayersController extends Controller
      */
     public function destroy($id)
     {
+        //一致する$idを調べる
         Player::where('id', '=', $id)->
+        
+        //消す
         delete();
 
-        return response()->json($id, 200);
+        //logみたいな処理
+        return response('削除完了',200);
     }
 
     /**
