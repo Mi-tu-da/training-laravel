@@ -7,7 +7,7 @@ use App\Models\Player;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\DB;
+
         
 class PlayersController extends Controller
 {
@@ -36,11 +36,9 @@ class PlayersController extends Controller
     {
         return new Response(
 
-            Player::where('id', '=', $id)->
-            select(['id','name','hp','mp','money'])->
-            get()
+            Player::query()->
+            find($id)
         );
-
     }
 
     /**
@@ -53,10 +51,8 @@ class PlayersController extends Controller
     {
         return new Response(
             
-            Player::query()->
-
             //情報を尋ねる処理
-            insertGetId([
+            Player::insertGetId([
 
                 'id'    => $request->id,
                 'name'  => $request->name,
@@ -64,8 +60,6 @@ class PlayersController extends Controller
                 'mp'    => $request->mp,
                 'money' => $request->money,
             ])
-    
-            
         );
     }
 
@@ -78,16 +72,10 @@ class PlayersController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //どこにあるか調べる
-        Player::where('id', '=', $id)->
-
         //更新するために問い合わせる
-        update(['name' => $request->name,
-                'hp' =>$request->hp,
-                'mp' =>$request->mp,
-                'money' =>$request->money
-        ]);
-        
+        Player::where('id', $id)->
+        update($request -> all());
+       
         //logみたいな処理
         return response('更新した。', 200);
     }
@@ -100,10 +88,8 @@ class PlayersController extends Controller
      */
     public function destroy($id)
     {
-        //一致する$idを調べる
-        Player::where('id', '=', $id)->
-        
-        //消す
+        //一致する$idを調べて消す
+        Player::where('id', $id)->
         delete();
 
         //logみたいな処理
