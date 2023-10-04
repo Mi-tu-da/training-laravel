@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Log;
 
+        
 class PlayersController extends Controller
 {
     /**
@@ -18,9 +19,11 @@ class PlayersController extends Controller
     public function index()
     {
         return new Response(
+
             Player::query()->
-            select(['id', 'name'])->
-            get());
+            select(['id', 'name','hp','mp','money'])->
+            get()
+        );
     }
 
     /**
@@ -31,7 +34,11 @@ class PlayersController extends Controller
      */
     public function show($id)
     {
+        return new Response(
 
+            Player::query()->
+            find($id)
+        );
     }
 
     /**
@@ -42,7 +49,18 @@ class PlayersController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        // 新しいプレイヤーレコードをデータベースに挿入し、そのIDを取得する
+        $GetId = Player::insertGetId([
+
+            'name'  => $request->name,
+            'hp'    => $request->hp,
+            'mp'    => $request->mp,
+            'money' => $request->money,
+        ]);
+
+        // レスポンスにIDを含むJSONを返す
+        return response()->json(['id' => $GetId], 200);
+
     }
 
     /**
@@ -54,7 +72,12 @@ class PlayersController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        //更新するために問い合わせる
+        Player::where('id', $id)->
+        update($request -> all());
+       
+        //logみたいな処理
+        return response('更新した。', 200);
     }
 
     /**
@@ -65,7 +88,12 @@ class PlayersController extends Controller
      */
     public function destroy($id)
     {
-        //
+        //一致する$idを調べて消す
+        Player::where('id', $id)->
+        delete();
+
+        //logみたいな処理
+        return response('削除完了',200);
     }
 
     /**
@@ -73,10 +101,11 @@ class PlayersController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create()
+    public function create(Request $request)
     {
-        //
+        
     }
+
 
     /**
      * Show the form for editing the specified resource.
