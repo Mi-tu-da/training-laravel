@@ -16,11 +16,11 @@ class PlayerItem extends Migration
         Schema::create('player_items', function (Blueprint $table) {
 
             //符号なし整数を用意
-            $table->unsignedBigInteger('player_id');
-            $table->unsignedBigInteger('item_id');
+            $table->unsignedBigInteger('player_id')->comment("プレイヤーID");
+            $table->unsignedBigInteger('item_id')->comment("アイテムID");
 
             //カウント用整数用意
-            $table->integer('count')->default(0);
+            $table->integer('count')->default(0)->comment("所持");
 
             //タイムスタンプのような機能をテーブルに追加する
             $table->timestamps();
