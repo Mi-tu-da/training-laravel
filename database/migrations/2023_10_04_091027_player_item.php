@@ -37,6 +37,7 @@ class PlayerItem extends Migration
      */
     public function down()
     {
-        //
+        //up メソッドで行った変更を元に戻す処理
+        Schema::dropIfExists('player_items');
     }
 }
