@@ -30,4 +30,6 @@ class CreateItemsTable extends Migration
     {
         Schema::dropIfExists('items');
     }
+    //課題４ファイル追加
+    //リクエストは、カウントのみ
 }

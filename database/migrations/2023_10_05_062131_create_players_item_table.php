@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class PlayerItem extends Migration
+class CreatePlayersItemTable extends Migration
 {
     /**
      * Run the migrations.
@@ -24,6 +24,7 @@ class PlayerItem extends Migration
             
             //player_id と item_id の組み合わせが主キー
             $table->primary(['player_id', 'item_id']);
+           
         });
     }
 
