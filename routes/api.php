@@ -3,6 +3,8 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PlayersController;
+use App\Http\Controllers\PlayersItemController;
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -19,3 +21,6 @@ Route::get('/players/{id}', [PlayersController::class, 'show']);
 Route::post('/players', [PlayersController::class, 'store']);
 Route::put('/players/{id}', [PlayersController::class, 'update']);
 Route::delete('/players/{id}', [PlayersController::class, 'destroy']);
+
+//ルート作成
+Route::post('/players/{id}/addItem', [PlayersItemController::class, 'addItem']);
