@@ -30,12 +30,12 @@ class PlayersItemController extends Controller
         if ($playerItem) { 
 
             // アイテムが既に存在する場合は count を加算
-            $playerItem = PlayerItems::where('player_id',$playerSearch -> id)
+            PlayerItems::where('player_id',$playerSearch -> id)
                 ->where('item_id',$itemSearch -> id)
                 ->Update(['count' => $playerItem->count + $count]);
 
             // 加算後のアイテムの数量と itemId をレスポンスとして返す
-            return response()->json(['itemId' => $itemId, 'count' => $request -> count]);
+            return response()->json(['itemId' => $itemId, 'count' => $playerItem->count + $count]);
 
         } else { // ➂比較でアイテムが存在しない処理
 
@@ -48,8 +48,9 @@ class PlayersItemController extends Controller
             ]);
 
             // 追加後のアイテムの数量と itemId をレスポンスとして返す
-            return response()->json(['itemId' => $itemId, 'count' => $count]);
+            return response()->json(['itemId' => $itemId, 'count' => $request -> count]);
         }
+
     }
 }
 
