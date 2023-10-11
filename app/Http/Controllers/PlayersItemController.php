@@ -69,64 +69,65 @@ class PlayersItemController extends Controller
         //アイテムが存在する処理
         if($playerItem){
 
-            //HP.ver
-            if($itemId == 1){
-            
-                if($playerSearch->hp >= 200) {
+            if($playerItem->count > 0){
 
-                    return response()->json(['itemId'=>$itemSearch->id, 'count'=>$playerItem->count,'player'=>['id'=>$playerSearch->id, 'hp'=>$playerSearch->hp, 'mp'=>$playerSearch->mp, 'message'=>'使っても意味がない。']], 200);
-                }
-
-                PlayerItems::where('player_id', $playerSearch->id)
-                ->where('item_id', $itemSearch->id)
-                ->Update(['count'=>$playerItem->count - $count]);
+                //HP.ver
+                if($itemId == 1){
                 
-                //回復させる。
-                $playerSearch->hp += $itemSearch->value;
-                $playerSearch->save();
+                    if($playerSearch->hp >= 200) {
 
-                if($playerSearch->hp >= 200){
+                        return response()->json(['itemId'=>$itemSearch->id, 'count'=>$playerItem->count,'player'=>['id'=>$playerSearch->id, 'hp'=>$playerSearch->hp, 'mp'=>$playerSearch->mp, 'message'=>'使っても意味がない。']], 200);
+                    }
 
-                    $playerSearch->hp = 200;
-                    $playerSearch->save();
-                }
-                
-                //消費したメッセージ
-                return response()->json(['itemId'=>$itemSearch->id, 'count'=>$playerItem->count,'player'=>['id'=>$playerSearch->id, 'hp'=>$playerSearch->hp, 'mp'=>$playerSearch->mp, 'message'=>'アイテムを消費しました。']], 200);
-            }
-
-            //MP.ver
-            if($itemId == 2){
-
-                if($playerSearch->mp >= 200) {
-
-                    return response()->json(['itemId'=>$itemSearch->id, 'count'=>$playerItem->count,'player'=>['id'=>$playerSearch->id, 'hp'=>$playerSearch->hp, 'mp'=>$playerSearch->mp, 'message'=>'使っても意味がない。']], 200);
-                }
-
-                PlayerItems::where('player_id', $playerSearch->id)
+                    PlayerItems::where('player_id', $playerSearch->id)
                     ->where('item_id', $itemSearch->id)
-                    ->Update(['count'=>$playerItem->count - $count])
-                    ->save();
+                    ->Update(['count'=>$playerItem->count - $count]);
+
+                    //回復させる。
+                    $playerSearch->hp += $itemSearch->value;
+                    $playerSearch->save();
+
+                    if($playerSearch->hp >= 200){
+
+                        $playerSearch->hp = 200;
+                        $playerSearch->save();
+                    }
+
+                    //消費したメッセージ
+                    return response()->json(['itemId'=>$itemSearch->id, 'count'=>$playerItem->count,'player'=>['id'=>$playerSearch->id, 'hp'=>$playerSearch->hp, 'mp'=>$playerSearch->mp, 'message'=>'アイテムを消費しました。']], 200);
+                }
+
+                //MP.ver
+                if($itemId == 2){
+
+                    if($playerSearch->mp >= 200) {
+
+                        return response()->json(['itemId'=>$itemSearch->id, 'count'=>$playerItem->count,'player'=>['id'=>$playerSearch->id, 'hp'=>$playerSearch->hp, 'mp'=>$playerSearch->mp, 'message'=>'使っても意味がない。']], 200);
+                    }
+
+                    PlayerItems::where('player_id', $playerSearch->id)
+                        ->where('item_id', $itemSearch->id)
+                        ->Update(['count'=>$playerItem->count - $count]);
 
                     $playerSearch->mp += $itemSearch->value;
                     $playerSearch->save();
-    
+                
                     if($playerSearch->mp >= 200){
-    
+                        
                         $playerSearch->mp = 200;
                         $playerSearch->save();
                     }
 
-                //消費したメッセージ
-                return response()->json(['itemId'=>$itemSearch->id, 'count'=>$playerItem->count,'player'=>['id'=>$playerSearch->id, 'hp'=>$playerSearch->hp, 'mp'=>$playerSearch->mp, 'message'=>'アイテムを消費しました。']], 200);
+                    //消費したメッセージ
+                    return response()->json(['itemId'=>$itemSearch->id, 'count'=>$playerItem->count,'player'=>['id'=>$playerSearch->id, 'hp'=>$playerSearch->hp, 'mp'=>$playerSearch->mp, 'message'=>'アイテムを消費しました。']], 200);
+                }
+
+            }else{
+
+                //エラーメッセージ
+                return response()->json(['itemId'=>$itemSearch->id, 'count'=>$playerItem->count,'player'=>['id'=>$playerSearch->id, 'hp'=>$playerSearch->hp, 'mp'=>$playerSearch->mp, 'message'=>'アイテムがありません。']], 400);
             }
-
-            
-        }else{
-
-            //エラーメッセージ
-            return response()->json(['itemId'=>$itemSearch->id, 'count'=>$playerItem->count,'player'=>['id'=>$playerSearch->id, 'hp'=>$playerSearch->hp, 'mp'=>$playerSearch->mp, 'message'=>'アイテムがありません。']], 400);
-        }
+        }    
     }
 }
 
