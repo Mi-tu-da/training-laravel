@@ -143,10 +143,7 @@ class PlayersItemController extends Controller
         $getItemA = 0;
         $getItemB = 0;
 
-        // プレイヤーが金を持っているか問い合わせる処理
-        $playerMoney = Player::where('id', $playerSearch->id) 
-            ->where('money', '>=', $count * 10) 
-            ->first();
+        $playerMoney =  $playerSearch;
         
         if(!$playerMoney || $playerMoney->money < $count * 10){
 
