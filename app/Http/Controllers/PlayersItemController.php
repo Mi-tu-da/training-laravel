@@ -50,7 +50,6 @@ class PlayersItemController extends Controller
             // 追加後のアイテムの数量と itemId をレスポンスとして返す
             return response()->json(['itemId'=>$itemId, 'count'=>$request->count]);
         }
-
     }
 
     public function useItem(Request $request, $id) {
@@ -74,7 +73,8 @@ class PlayersItemController extends Controller
             
                 if($playerSearch->hp >= 200) {
 
-                    return response()->json(['itemId'=>$itemSearch->id, 'count'=>$playerItem->count,'player'=>['id'=>$playerSearch->id, 'hp'=>$playerSearch->hp, 'mp'=>$playerSearch->mp, 'message'=>'使っても意味がない。']], 200);
+                    return response()->json(['itemId'=>$itemSearch->id, 'count'=>$playerItem->count,'player'=>['id'=>$playerSearch->id, 
+                        'hp'=>$playerSearch->hp, 'mp'=>$playerSearch->mp, 'message'=>'使っても意味がない。']], 200);
                 }
 
                 PlayerItems::where('player_id', $playerSearch->id)
@@ -92,7 +92,8 @@ class PlayersItemController extends Controller
                 }
 
                 //消費したメッセージ
-                return response()->json(['itemId'=>$itemSearch->id, 'count'=>$playerItem->count,'player'=>['id'=>$playerSearch->id, 'hp'=>$playerSearch->hp, 'mp'=>$playerSearch->mp, 'message'=>'アイテムを消費しました。']], 200);
+                return response()->json(['itemId'=>$itemSearch->id, 'count'=>$playerItem->count,'player'=>['id'=>$playerSearch->id, 
+                    'hp'=>$playerSearch->hp, 'mp'=>$playerSearch->mp, 'message'=>'アイテムを消費しました。']], 200);
             }
 
             //MP.ver
@@ -100,7 +101,8 @@ class PlayersItemController extends Controller
 
                 if($playerSearch->mp >= 200) {
                     
-                    return response()->json(['itemId'=>$itemSearch->id, 'count'=>$playerItem->count,'player'=>['id'=>$playerSearch->id, 'hp'=>$playerSearch->hp, 'mp'=>$playerSearch->mp, 'message'=>'使っても意味がない。']], 200);
+                    return response()->json(['itemId'=>$itemSearch->id, 'count'=>$playerItem->count,'player'=>['id'=>$playerSearch->id, 
+                        'hp'=>$playerSearch->hp, 'mp'=>$playerSearch->mp, 'message'=>'使っても意味がない。']], 200);
                 }
 
                 PlayerItems::where('player_id', $playerSearch->id)
@@ -117,14 +119,124 @@ class PlayersItemController extends Controller
                 }
 
                 //消費したメッセージ
-                return response()->json(['itemId'=>$itemSearch->id, 'count'=>$playerItem->count,'player'=>['id'=>$playerSearch->id, 'hp'=>$playerSearch->hp, 'mp'=>$playerSearch->mp, 'message'=>'アイテムを消費しました。']], 200);
+                return response()->json(['itemId'=>$itemSearch->id, 'count'=>$playerItem->count,'player'=>['id'=>$playerSearch->id, 
+                    'hp'=>$playerSearch->hp, 'mp'=>$playerSearch->mp, 'message'=>'アイテムを消費しました。']], 200);
             }
 
         }else{
 
             //エラーメッセージ
-            return response()->json(['itemId'=>$itemSearch->id, 'count'=>$playerItem->count,'player'=>['id'=>$playerSearch->id, 'hp'=>$playerSearch->hp, 'mp'=>$playerSearch->mp, 'message'=>'アイテムがありません。']], 400);
+            return response()->json(['itemId'=>$itemSearch->id, 'count'=>$playerItem->count,'player'=>['id'=>$playerSearch->id, 
+                'hp'=>$playerSearch->hp, 'mp'=>$playerSearch->mp, 'message'=>'アイテムがありません。']], 400);
         }      
     }
+
+    public function useGacha(Request $request, $id) {
+
+        // 変数宣言
+        $count = $request->count;
+        $playerSearch = Player::find($id);
+        
+        $itemA = Item::find(1);
+        $itemB = Item::find(2);
+        
+        $getItemA = 0;
+        $getItemB = 0;
+
+        // プレイヤーが金を持っているか問い合わせる処理
+        $playerMoney = Player::where('id', $playerSearch->id) 
+            ->where('money', '>=', $count * 10) 
+            ->first();
+        
+        if(!$playerMoney || $playerMoney->money < $count * 10){
+
+           //エラーメッセージ
+           return response()->json(['message'=>'お金が足りません'], 400); 
+        }
+
+        if($playerMoney){
+
+            // 回すガチャの数分金を引く
+            $playerMoney->money -= $count * 10;
+            $playerMoney->save();
+
+            // ガチャの結果を初期化
+            $results = [];
+
+            // ガチャを引く回数分繰り返す
+            for ($i = 0; $i < $count; $i++) {
+
+                $random = mt_rand(1, 100);
+            
+                $item = NULL;
+
+                // ガチャ確率
+                if ($itemA->percent >= $random) { 
+
+                    $item = $itemA;
+                    $getItemA += 1;
+
+                }else{
+
+                    $random -= $itemA->percent;
+                } 
+                
+                if($itemB->percent >= $random){
+                    
+                    $item = $itemB;
+                    $getItemB += 1;
+                }
+
+                if($item){
+
+                    //➀プレイヤーがアイテムを持っているか問い合わせる処理
+                    $playerItem = PlayerItems::where('player_id', $playerSearch->id)
+                        ->where('item_id', $item->id)
+                        ->first();
+
+                    if ($playerItem) { 
+
+                        // アイテムが既に存在する場合は count を加算
+                        PlayerItems::where('player_id', $playerSearch->id)
+                            ->where('item_id', $item->id)
+                            ->Update(['count'=>$playerItem->count + 1]);
+
+                    } else { 
+
+                        // アイテムが存在しない場合は新しく追加
+                        PlayerItems::insert([
+
+                            'player_id' => $id,
+                            'item_id' => $item->id,
+                            'count' => 1
+                        ]);
+                    }
+                }
+            }
+
+            //itemAの数
+            $results[] = [
+
+                'itemId' => $itemA->id,
+                'count' => $getItemA
+            ];
+
+            //itemBの数
+            $results[] = [
+
+                'itemId' => $itemB->id,
+                'count' => $getItemB
+            ];
+
+            return response()->json([
+                'results' => $results, 
+                'player'=>[
+                    'money'=>$playerSearch->money, 
+                        'items'=>PlayerItems::query()
+                        ->where('player_id', $playerSearch->id)
+                        ->select(['item_id as itemId', 'count'])
+                        ->get()]], 200);
+        }   
+    }    
 }
 
