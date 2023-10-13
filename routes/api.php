@@ -25,4 +25,4 @@ Route::delete('/players/{id}', [PlayersController::class, 'destroy']);
 //ルート作成
 Route::post('/players/{id}/addItem', [PlayersItemController::class, 'addItem']);
 Route::post('/players/{id}/useItem', [PlayersItemController::class, 'useItem']);
- 
+Route::post('/players/{id}/useGacha', [PlayersItemController::class, 'useGacha']);
