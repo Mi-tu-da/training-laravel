@@ -145,9 +145,9 @@ class PlayersItemController extends Controller
 
         $playerMoney =  $playerSearch;
         
+        //お金があるかチェック
         if(!$playerMoney || $playerMoney->money < $count * 10){
 
-           //エラーメッセージ
            return response()->json(['message'=>'お金が足りません'], 400); 
         }
 
@@ -178,7 +178,7 @@ class PlayersItemController extends Controller
                     $random -= $itemA->percent;
                 } 
                 
-                if($itemB->percent >= $random){
+                if(($itemB->percent >= $random) && ($item == NULL)){
                     
                     $item = $itemB;
                     $getItemB += 1;
@@ -228,7 +228,7 @@ class PlayersItemController extends Controller
             return response()->json([
                 'results' => $results, 
                 'player'=>[
-                    'money'=>$playerSearch->money, 
+                    'money'=>$playerMoney->money, 
                         'items'=>PlayerItems::query()
                         ->where('player_id', $playerSearch->id)
                         ->select(['item_id as itemId', 'count'])
