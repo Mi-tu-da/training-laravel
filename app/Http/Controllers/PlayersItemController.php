@@ -80,7 +80,6 @@ class PlayersItemController extends Controller
             DB::beginTransaction();
 
             //変数宣言
-            $count = 1;
             $itemId = $request->itemId;
             $playerSearch = Player::find($id);
             $itemSearch = Item::find($itemId);
@@ -104,7 +103,7 @@ class PlayersItemController extends Controller
 
                     PlayerItems::where('player_id', $playerSearch->id)
                         ->where('item_id', $itemSearch->id)
-                    ->Update(['count'=>$playerItem->count - $count]);
+                        ->Update(['count'=>$playerItem->count =- 1]);
                 
                     //回復させる。
                     $playerSearch->hp += $itemSearch->value;
@@ -120,7 +119,7 @@ class PlayersItemController extends Controller
                     DB::commit();
 
                     //消費したメッセージ
-                    return response()->json(['itemId'=>$itemSearch->id, 'count'=>$playerItem->count,'player'=>['id'=>$playerSearch->id, 
+                    return response()->json(['itemId'=>$itemSearch->id, 'count'=>$reqest->count,'player'=>['id'=>$playerSearch->id, 
                         'hp'=>$playerSearch->hp, 'mp'=>$playerSearch->mp, 'message'=>'アイテムを消費しました。']], 200);
                 }
 
@@ -135,7 +134,7 @@ class PlayersItemController extends Controller
 
                     PlayerItems::where('player_id', $playerSearch->id)
                         ->where('item_id', $itemSearch->id)
-                        ->Update(['count'=>$playerItem->count - $count]);
+                        ->Update(['count'=>$playerItem->count -= 1]);
 
                     $playerSearch->mp += $itemSearch->value;
                     $playerSearch->save();
@@ -274,4 +273,3 @@ class PlayersItemController extends Controller
         }   
     }    
 }
-
