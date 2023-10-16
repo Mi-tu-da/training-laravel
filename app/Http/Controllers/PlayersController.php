@@ -61,8 +61,6 @@ class PlayersController extends Controller
             return response()->json(['id' => $GetId], 200);
         
         } catch (\Exception $e) {/*例外がスローされた場合の処理*/
-            
-            echo '例外が発生しました: ' . $e->getMessage();
 
             // 失敗した場合はロールバック
             DB::rollback();
@@ -94,8 +92,6 @@ class PlayersController extends Controller
             return response('更新した。', 200);
         
         } catch (\Exception $e) {
-            
-            echo '例外が発生しました: ' . $e->getMessage();
 
             DB::rollback();
 
@@ -125,8 +121,6 @@ class PlayersController extends Controller
             return response('削除完了',200);
         
         } catch (\Exception $e) {
-            
-            echo '例外が発生しました: ' . $e->getMessage();
 
             DB::rollback();
 
