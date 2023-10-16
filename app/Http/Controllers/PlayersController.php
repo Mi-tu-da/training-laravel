@@ -18,12 +18,28 @@ class PlayersController extends Controller
      */
     public function index()
     {
-        return new Response(
+        try {/*何らかの処理、例外がスローされる可能性がある*/
+           
+            //トランザクション開始
+            Player::beginTransaction();
 
-            Player::query()->
-            select(['id', 'name','hp','mp','money'])->
-            get()
-        );
+            return new Response(
+
+                Player::query()->
+                select(['id', 'name','hp','mp','money'])->
+                get()
+            );
+            
+            //全ての操作が成功したらコミット
+            Player::commit(); 
+        
+        } catch (\Exception $e) {/*例外がスローされた場合の処理*/
+            
+            echo '例外が発生しました: ' . $e->getMessage();
+
+            // 失敗した場合はロールバック
+            Player::rollback(); 
+        }
     }
 
     /**
@@ -34,11 +50,24 @@ class PlayersController extends Controller
      */
     public function show($id)
     {
-        return new Response(
+        try {
+           
+            Player::beginTransaction();
 
-            Player::query()->
-            find($id)
-        );
+            return new Response(
+
+                Player::query()->
+                find($id)
+            );
+            
+            Player::commit();
+        
+        } catch (\Exception $e) {
+            
+            echo '例外が発生しました: ' . $e->getMessage();
+
+            Player::rollback();
+        }
     }
 
     /**
@@ -49,18 +78,30 @@ class PlayersController extends Controller
      */
     public function store(Request $request)
     {
-        // 新しいプレイヤーレコードをデータベースに挿入し、そのIDを取得する
-        $GetId = Player::insertGetId([
+        try {
 
-            'name'  => $request->name,
-            'hp'    => $request->hp,
-            'mp'    => $request->mp,
-            'money' => $request->money,
-        ]);
+            Player::beginTransaction();
 
-        // レスポンスにIDを含むJSONを返す
-        return response()->json(['id' => $GetId], 200);
+            // 新しいプレイヤーレコードをデータベースに挿入し、そのIDを取得する
+            $GetId = Player::insertGetId([
 
+                'name'  => $request->name,
+                'hp'    => $request->hp,
+                'mp'    => $request->mp,
+                'money' => $request->money,
+            ]);
+
+            // レスポンスにIDを含むJSONを返す
+            return response()->json(['id' => $GetId], 200);
+            
+            Player::commit();
+        
+        } catch (\Exception $e) {
+            
+            echo '例外が発生しました: ' . $e->getMessage();
+
+            Player::rollback();
+        }
     }
 
     /**
@@ -72,12 +113,25 @@ class PlayersController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //更新するために問い合わせる
-        Player::where('id', $id)->
-        update($request -> all());
+        try {
+
+            Player::beginTransaction();
+           
+            //更新するために問い合わせる
+            Player::where('id', $id)->
+            update($request -> all());
        
-        //logみたいな処理
-        return response('更新した。', 200);
+            //logみたいな処理
+            return response('更新した。', 200);
+            
+            Player::commit();
+        
+        } catch (\Exception $e) {
+            
+            echo '例外が発生しました: ' . $e->getMessage();
+
+            Player::rollback();
+        }
     }
 
     /**
@@ -88,12 +142,25 @@ class PlayersController extends Controller
      */
     public function destroy($id)
     {
-        //一致する$idを調べて消す
-        Player::where('id', $id)->
-        delete();
+        try {
 
-        //logみたいな処理
-        return response('削除完了',200);
+            Player::beginTransaction();
+
+            //一致する$idを調べて消す
+            Player::where('id', $id)->
+            delete();
+
+            //logみたいな処理
+            return response('削除完了',200);
+            
+            Player::commit();
+        
+        } catch (\Exception $e) {
+            
+            echo '例外が発生しました: ' . $e->getMessage();
+
+            Player::rollback();
+        }
     }
 
     /**
