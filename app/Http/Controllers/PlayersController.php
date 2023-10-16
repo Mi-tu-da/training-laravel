@@ -7,7 +7,7 @@ use App\Models\Player;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Log;
-
+use Illuminate\Support\Facades\DB;
         
 class PlayersController extends Controller
 {
@@ -18,12 +18,7 @@ class PlayersController extends Controller
      */
     public function index()
     {
-        return new Response(
-
-            Player::query()->
-            select(['id', 'name','hp','mp','money'])->
-            get()
-        );
+        return response()->json(Player::query()->select(['id', 'name', 'hp', 'mp', 'money'])->get(),200);
     }
 
     /**
@@ -34,11 +29,7 @@ class PlayersController extends Controller
      */
     public function show($id)
     {
-        return new Response(
-
-            Player::query()->
-            find($id)
-        );
+        return response()->json(Player::query()->where('id',$id)->select(['id', 'name', 'hp', 'mp', 'money'])->get(),200);
     }
 
     /**
@@ -49,18 +40,33 @@ class PlayersController extends Controller
      */
     public function store(Request $request)
     {
-        // 新しいプレイヤーレコードをデータベースに挿入し、そのIDを取得する
-        $GetId = Player::insertGetId([
+        try {/*何らかの処理、例外がスローされる可能性がある*/
 
-            'name'  => $request->name,
-            'hp'    => $request->hp,
-            'mp'    => $request->mp,
-            'money' => $request->money,
-        ]);
+            //トランザクション開始
+            DB::beginTransaction();
 
-        // レスポンスにIDを含むJSONを返す
-        return response()->json(['id' => $GetId], 200);
+            // 新しいプレイヤーレコードをデータベースに挿入し、そのIDを取得する
+            $GetId = Player::insertGetId([
 
+                'name'  => $request->name,
+                'hp'    => $request->hp,
+                'mp'    => $request->mp,
+                'money' => $request->money,
+            ]);
+
+            //全ての操作が成功したらコミット
+            DB::commit();
+
+            // レスポンスにIDを含むJSONを返す
+            return response()->json(['id' => $GetId], 200);
+        
+        } catch (\Exception $e) {/*例外がスローされた場合の処理*/
+
+            // 失敗した場合はロールバック
+            DB::rollback();
+
+            return response('追加できませんでした。',400);
+        }
     }
 
     /**
@@ -72,12 +78,25 @@ class PlayersController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //更新するために問い合わせる
-        Player::where('id', $id)->
-        update($request -> all());
-       
-        //logみたいな処理
-        return response('更新した。', 200);
+        try {
+
+            DB::beginTransaction();
+           
+            //更新するために問い合わせる
+            Player::where('id', $id)->
+            update($request -> all());
+
+            DB::commit();
+
+            //logみたいな処理
+            return response('更新した。', 200);
+        
+        } catch (\Exception $e) {
+
+            DB::rollback();
+
+            return response('更新できませんでした。',400);
+        }
     }
 
     /**
@@ -88,12 +107,25 @@ class PlayersController extends Controller
      */
     public function destroy($id)
     {
-        //一致する$idを調べて消す
-        Player::where('id', $id)->
-        delete();
+        try {
 
-        //logみたいな処理
-        return response('削除完了',200);
+            DB::beginTransaction();
+
+            //一致する$idを調べて消す
+            Player::where('id', $id)->
+            delete();
+
+            DB::commit();
+
+            //logみたいな処理
+            return response('削除完了',200);
+        
+        } catch (\Exception $e) {
+
+            DB::rollback();
+
+            return response('削除できませんでした。',400);
+        }
     }
 
     /**
