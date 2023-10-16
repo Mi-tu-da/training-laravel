@@ -7,7 +7,7 @@ use App\Models\Player;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Log;
-
+use Illuminate\Support\Facades\DB;
         
 class PlayersController extends Controller
 {
@@ -21,7 +21,7 @@ class PlayersController extends Controller
         try {/*何らかの処理、例外がスローされる可能性がある*/
            
             //トランザクション開始
-            Player::beginTransaction();
+            DB::beginTransaction();
 
             return new Response(
 
@@ -31,14 +31,14 @@ class PlayersController extends Controller
             );
             
             //全ての操作が成功したらコミット
-            Player::commit(); 
+            DB::commit(); 
         
         } catch (\Exception $e) {/*例外がスローされた場合の処理*/
             
             echo '例外が発生しました: ' . $e->getMessage();
 
             // 失敗した場合はロールバック
-            Player::rollback(); 
+            DB::rollback(); 
         }
     }
 
@@ -52,7 +52,7 @@ class PlayersController extends Controller
     {
         try {
            
-            Player::beginTransaction();
+            DB::beginTransaction();
 
             return new Response(
 
@@ -60,13 +60,13 @@ class PlayersController extends Controller
                 find($id)
             );
             
-            Player::commit();
+            DB::commit();
         
         } catch (\Exception $e) {
             
             echo '例外が発生しました: ' . $e->getMessage();
 
-            Player::rollback();
+            DB::rollback();
         }
     }
 
@@ -80,7 +80,7 @@ class PlayersController extends Controller
     {
         try {
 
-            Player::beginTransaction();
+            DB::beginTransaction();
 
             // 新しいプレイヤーレコードをデータベースに挿入し、そのIDを取得する
             $GetId = Player::insertGetId([
@@ -94,13 +94,13 @@ class PlayersController extends Controller
             // レスポンスにIDを含むJSONを返す
             return response()->json(['id' => $GetId], 200);
             
-            Player::commit();
+            DB::commit();
         
         } catch (\Exception $e) {
             
             echo '例外が発生しました: ' . $e->getMessage();
 
-            Player::rollback();
+            DB::rollback();
         }
     }
 
@@ -115,7 +115,7 @@ class PlayersController extends Controller
     {
         try {
 
-            Player::beginTransaction();
+            DB::beginTransaction();
            
             //更新するために問い合わせる
             Player::where('id', $id)->
@@ -124,13 +124,13 @@ class PlayersController extends Controller
             //logみたいな処理
             return response('更新した。', 200);
             
-            Player::commit();
+            DB::commit();
         
         } catch (\Exception $e) {
             
             echo '例外が発生しました: ' . $e->getMessage();
 
-            Player::rollback();
+            DB::rollback();
         }
     }
 
@@ -144,7 +144,7 @@ class PlayersController extends Controller
     {
         try {
 
-            Player::beginTransaction();
+            DB::beginTransaction();
 
             //一致する$idを調べて消す
             Player::where('id', $id)->
@@ -153,13 +153,13 @@ class PlayersController extends Controller
             //logみたいな処理
             return response('削除完了',200);
             
-            Player::commit();
+            DB::commit();
         
         } catch (\Exception $e) {
             
             echo '例外が発生しました: ' . $e->getMessage();
 
-            Player::rollback();
+            DB::rollback();
         }
     }
 
