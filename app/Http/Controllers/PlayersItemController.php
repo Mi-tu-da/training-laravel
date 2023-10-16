@@ -167,7 +167,6 @@ class PlayersItemController extends Controller
 
             return response('何らかのエラーでアイテムが消費できませんでした。',400);
         }
-        
     }
 
     public function useGacha(Request $request, $id) {
