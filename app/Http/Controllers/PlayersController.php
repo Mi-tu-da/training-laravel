@@ -18,28 +18,12 @@ class PlayersController extends Controller
      */
     public function index()
     {
-        try {/*何らかの処理、例外がスローされる可能性がある*/
-           
-            //トランザクション開始
-            DB::beginTransaction();
+        return new Response(
 
-            return new Response(
-
-                Player::query()->
-                select(['id', 'name','hp','mp','money'])->
-                get()
-            );
-            
-            //全ての操作が成功したらコミット
-            DB::commit(); 
-        
-        } catch (\Exception $e) {/*例外がスローされた場合の処理*/
-            
-            echo '例外が発生しました: ' . $e->getMessage();
-
-            // 失敗した場合はロールバック
-            DB::rollback(); 
-        }
+            Player::query()->
+            select(['id', 'name','hp','mp','money'])->
+            get()
+        );
     }
 
     /**
@@ -50,24 +34,11 @@ class PlayersController extends Controller
      */
     public function show($id)
     {
-        try {
-           
-            DB::beginTransaction();
+        return new Response(
 
-            return new Response(
-
-                Player::query()->
-                find($id)
-            );
-            
-            DB::commit();
-        
-        } catch (\Exception $e) {
-            
-            echo '例外が発生しました: ' . $e->getMessage();
-
-            DB::rollback();
-        }
+            Player::query()->
+            find($id)
+        );
     }
 
     /**
@@ -78,8 +49,9 @@ class PlayersController extends Controller
      */
     public function store(Request $request)
     {
-        try {
+        try {/*何らかの処理、例外がスローされる可能性がある*/
 
+            //トランザクション開始
             DB::beginTransaction();
 
             // 新しいプレイヤーレコードをデータベースに挿入し、そのIDを取得する
@@ -91,15 +63,17 @@ class PlayersController extends Controller
                 'money' => $request->money,
             ]);
 
+            //全ての操作が成功したらコミット
+            DB::commit();
+
             // レスポンスにIDを含むJSONを返す
             return response()->json(['id' => $GetId], 200);
-            
-            DB::commit();
         
-        } catch (\Exception $e) {
+        } catch (\Exception $e) {/*例外がスローされた場合の処理*/
             
             echo '例外が発生しました: ' . $e->getMessage();
 
+            // 失敗した場合はロールバック
             DB::rollback();
         }
     }
@@ -121,10 +95,10 @@ class PlayersController extends Controller
             Player::where('id', $id)->
             update($request -> all());
        
+            DB::commit();
+
             //logみたいな処理
             return response('更新した。', 200);
-            
-            DB::commit();
         
         } catch (\Exception $e) {
             
@@ -150,10 +124,10 @@ class PlayersController extends Controller
             Player::where('id', $id)->
             delete();
 
+            DB::commit();
+
             //logみたいな処理
             return response('削除完了',200);
-            
-            DB::commit();
         
         } catch (\Exception $e) {
             
