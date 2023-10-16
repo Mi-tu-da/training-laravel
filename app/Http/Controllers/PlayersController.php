@@ -64,10 +64,10 @@ class PlayersController extends Controller
             
             echo '例外が発生しました: ' . $e->getMessage();
 
-            return response('追加できませんでした。',400);
-
             // 失敗した場合はロールバック
             DB::rollback();
+
+            return response('追加できませんでした。',400);
         }
     }
 
@@ -97,9 +97,9 @@ class PlayersController extends Controller
             
             echo '例外が発生しました: ' . $e->getMessage();
 
-            return response('更新できませんでした。',400);
-
             DB::rollback();
+
+            return response('更新できませんでした。',400);
         }
     }
 
@@ -128,9 +128,9 @@ class PlayersController extends Controller
             
             echo '例外が発生しました: ' . $e->getMessage();
 
-            return response('削除できませんでした。',400);
-
             DB::rollback();
+
+            return response('削除できませんでした。',400);
         }
     }
 
