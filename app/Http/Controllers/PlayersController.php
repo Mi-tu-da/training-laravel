@@ -18,12 +18,7 @@ class PlayersController extends Controller
      */
     public function index()
     {
-        return new Response(
-
-            Player::query()->
-            select(['id', 'name','hp','mp','money'])->
-            get()
-        );
+        return response()->json(Player::query()->select(['id', 'name', 'hp', 'mp', 'money'])->get(),200);
     }
 
     /**
@@ -34,11 +29,7 @@ class PlayersController extends Controller
      */
     public function show($id)
     {
-        return new Response(
-
-            Player::query()->
-            find($id)
-        );
+        return response()->json(Player::query()->where('id',$id)->select(['id', 'name', 'hp', 'mp', 'money'])->get(),200);
     }
 
     /**
@@ -73,6 +64,8 @@ class PlayersController extends Controller
             
             echo '例外が発生しました: ' . $e->getMessage();
 
+            return response('追加できませんでした。',400);
+
             // 失敗した場合はロールバック
             DB::rollback();
         }
@@ -94,7 +87,7 @@ class PlayersController extends Controller
             //更新するために問い合わせる
             Player::where('id', $id)->
             update($request -> all());
-       
+
             DB::commit();
 
             //logみたいな処理
@@ -103,6 +96,8 @@ class PlayersController extends Controller
         } catch (\Exception $e) {
             
             echo '例外が発生しました: ' . $e->getMessage();
+
+            return response('更新できませんでした。',400);
 
             DB::rollback();
         }
@@ -132,6 +127,8 @@ class PlayersController extends Controller
         } catch (\Exception $e) {
             
             echo '例外が発生しました: ' . $e->getMessage();
+
+            return response('削除できませんでした。',400);
 
             DB::rollback();
         }
