@@ -103,7 +103,7 @@ class PlayersItemController extends Controller
 
                     PlayerItems::where('player_id', $playerSearch->id)
                         ->where('item_id', $itemSearch->id)
-                        ->Update(['count'=>$playerItem->count =- 1]);
+                        ->Update(['count'=>$playerItem->count -= 1]);
                 
                     //回復させる。
                     $playerSearch->hp += $itemSearch->value;
