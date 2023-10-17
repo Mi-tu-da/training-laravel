@@ -224,107 +224,124 @@ class PlayersItemController extends Controller
 
     public function useGacha(Request $request, $id) {
 
-        // 変数宣言
-        $count = $request->count;
-        $playerSearch = Player::find($id);
-        
-        $itemA = Item::find(1);
-        $itemB = Item::find(2);
-        
-        $getItemA = 0;
-        $getItemB = 0;
+        try {
 
-        $playerMoney =  $playerSearch;
-        
-        //お金があるかチェック
-        if(!$playerMoney || $playerMoney->money < $count * 10){
-
-           return response()->json(['message'=>'お金が足りません'], 400); 
-        }
-
-        if($playerMoney){
-
-            // 回すガチャの数分金を引く
-            $playerMoney->money -= $count * 10;
-            $playerMoney->save();
-
-            // ガチャの結果を初期化
-            $results = [];
-
-            // ガチャを引く回数分繰り返す
-            for ($i = 0; $i < $count; $i++) {
-
-                $random = mt_rand(1, 100);
+            //トランザクション開始
+            DB::beginTransaction();
+       
+            // 変数宣言
+            $count = $request->count;
+            $playerSearch = Player::find($id);
             
-                $item = NULL;
+            $itemA = Item::find(1);
+            $itemB = Item::find(2);
+            
+            $getItemA = 0;
+            $getItemB = 0;
 
-                // ガチャ確率
-                if ($itemA->percent >= $random) { 
+            $playerMoney =  $playerSearch;
+            
+            //お金があるかチェック
+            if(!$playerMoney || $playerMoney->money < $count * 10){
 
-                    $item = $itemA;
-                    $getItemA += 1;
-
-                }else{
-
-                    $random -= $itemA->percent;
-                } 
-                
-                if(($itemB->percent >= $random) && ($item == NULL)){
-                    
-                    $item = $itemB;
-                    $getItemB += 1;
-                }
-
-                if($item){
-
-                    //➀プレイヤーがアイテムを持っているか問い合わせる処理
-                    $playerItem = PlayerItems::where('player_id', $playerSearch->id)
-                        ->where('item_id', $item->id)
-                        ->first();
-
-                    if ($playerItem) { 
-
-                        // アイテムが既に存在する場合は count を加算
-                        PlayerItems::where('player_id', $playerSearch->id)
-                            ->where('item_id', $item->id)
-                            ->Update(['count'=>$playerItem->count + 1]);
-
-                    } else { 
-
-                        // アイテムが存在しない場合は新しく追加
-                        PlayerItems::insert([
-
-                            'player_id' => $id,
-                            'item_id' => $item->id,
-                            'count' => 1
-                        ]);
-                    }
-                }
+               return response()->json(['message'=>'お金が足りません'], 400); 
             }
 
-            //itemAの数
-            $results[] = [
+            if($playerMoney){
 
-                'itemId' => $itemA->id,
-                'count' => $getItemA
-            ];
+                // 回すガチャの数分金を引く
+                $playerMoney->money -= $count * 10;
+                $playerMoney->save();
 
-            //itemBの数
-            $results[] = [
+                // ガチャの結果を初期化
+                $results = [];
 
-                'itemId' => $itemB->id,
-                'count' => $getItemB
-            ];
+                // ガチャを引く回数分繰り返す
+                for ($i = 0; $i < $count; $i++) {
 
-            return response()->json([
-                'results' => $results, 
-                'player'=>[
-                    'money'=>$playerMoney->money, 
-                        'items'=>PlayerItems::query()
-                        ->where('player_id', $playerSearch->id)
-                        ->select(['item_id as itemId', 'count'])
-                        ->get()
-            ]], 200);
-        }   
+                    $random = mt_rand(1, 100);
+                
+                    $item = NULL;
+
+                    // ガチャ確率
+                    if ($itemA->percent >= $random) { 
+
+                        $item = $itemA;
+                        $getItemA += 1;
+
+                    }else{
+
+                        $random -= $itemA->percent;
+                    } 
+
+                    if(($itemB->percent >= $random) && ($item == NULL)){
+
+                        $item = $itemB;
+                        $getItemB += 1;
+                    }
+
+                    if($item){
+
+                        //➀プレイヤーがアイテムを持っているか問い合わせる処理
+                        $playerItem = PlayerItems::where('player_id', $playerSearch->id)
+                            ->where('item_id', $item->id)
+                            ->first();
+
+                        if ($playerItem) { 
+
+                            // アイテムが既に存在する場合は count を加算
+                            PlayerItems::where('player_id', $playerSearch->id)
+                                ->where('item_id', $item->id)
+                                ->Update(['count'=>$playerItem->count + 1]);
+
+                        } else { 
+
+                            // アイテムが存在しない場合は新しく追加
+                            PlayerItems::insert([
+
+                                'player_id' => $id,
+                                'item_id' => $item->id,
+                                'count' => 1
+                            ]);
+                        }
+                    }
+                }
+
+                //itemAの数
+                $results[] = [
+
+                    'itemId' => $itemA->id,
+                    'count' => $getItemA
+                ];
+
+                //itemBの数
+                $results[] = [
+
+                    'itemId' => $itemB->id,
+                    'count' => $getItemB
+                ];
+
+                //全ての操作が成功したらコミット
+                DB::commit();
+
+                return response()->json([
+                    'results' => $results, 
+                    'player'=>[
+                        'money'=>$playerMoney->money, 
+                            'items'=>PlayerItems::query()
+                            ->where('player_id', $playerSearch->id)
+                            ->select(['item_id as itemId', 'count'])
+                            ->get()
+                ]], 200);
+            }
+                    
+                
+        } catch (\Exception $e) {/*例外がスローされた場合の処理*/
+       
+            // 失敗した場合はロールバック
+            DB::rollback();
+       
+            return response('ガチャが回せませんでした。',400);
+        }
     }    
 }
