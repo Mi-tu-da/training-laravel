@@ -73,11 +73,10 @@ class PlayersItemController extends Controller
 
     public function useItem(Request $request, $id) {
 
-
-        //try {
+        try {
 
             //トランザクション開始
-            //DB::beginTransaction();
+            DB::beginTransaction();
 
             //変数宣言
             $usecount = 0;
@@ -111,8 +110,9 @@ class PlayersItemController extends Controller
 
                     for ($i = 0; $i < $count; $i++){
 
-                        if($playerSearch->hp >= 200 && $playerItem->count < $count){
+                        if($playerSearch->hp >= 200 || $playerItem->count < $count){
 
+                            $playerSearch->save();
                             break;
                         }
 
@@ -130,10 +130,9 @@ class PlayersItemController extends Controller
                             $playerSearch->save();
                         }
 
-                        $usecount = $usecount + 1;
+                        $usecount += 1;
                     } 
                     
-
                     //すべての操作が完了したらコミット
                     DB::commit();
 
@@ -165,8 +164,9 @@ class PlayersItemController extends Controller
 
                     for ($i = 0; $i < $count; $i++){
 
-                        if($playerSearch->mp >= 200 && $playerItem->count < $count){
+                        if($playerSearch->mp >= 200 || $playerItem->count < $count){
 
+                            $playerSearch->save();
                             break;
                         }
 
@@ -184,7 +184,7 @@ class PlayersItemController extends Controller
                             $playerSearch->save();
                         }
 
-                        $usecount = $usecount + 1;
+                        $usecount += 1;
                     } 
 
                     //すべての操作が完了したらコミット
@@ -214,12 +214,12 @@ class PlayersItemController extends Controller
                 ]], 400);
             }      
 
-        //} catch (\Exception $e) {
-//
-        //    DB::rollback();
-//
-        //    return response('何らかのエラーでアイテムが消費できませんでした。',400);
-        //}
+        } catch (\Exception $e) {
+
+            DB::rollback();
+
+            return response('何らかのエラーでアイテムが消費できませんでした。',400);
+        }
     }
 
     public function useGacha(Request $request, $id) {
