@@ -119,7 +119,7 @@ class PlayersItemController extends Controller
                     DB::commit();
 
                     //消費したメッセージ
-                    return response()->json(['itemId'=>$itemSearch->id, 'count'=>$reqest->count,'player'=>['id'=>$playerSearch->id, 
+                    return response()->json(['itemId'=>$itemSearch->id, 'count'=>$playerItem->count,'player'=>['id'=>$playerSearch->id, 
                         'hp'=>$playerSearch->hp, 'mp'=>$playerSearch->mp, 'message'=>'アイテムを消費しました。']], 200);
                 }
 
