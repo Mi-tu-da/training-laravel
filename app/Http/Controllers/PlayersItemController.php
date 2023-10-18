@@ -82,12 +82,14 @@ class PlayersItemController extends Controller
             $usecount = 0;
             $count = $request->count;
             $itemId = $request->itemId;
-            $playerSearch = Player::find($id);
-            $itemSearch = Item::find($itemId);
 
+            $playerSearch = Player::where('id', $id)->lockForUpdate()->first();
+            $itemSearch = Item::where('id', $itemId)->lockForUpdate()->first();
+            
             //プレイヤーがアイテムを持っているか問い合わせる処理
-            $playerItem = PlayerItems::where('player_id',$playerSearch->id)
-                ->where('item_id',$itemSearch->id)
+            $playerItem = PlayerItems::where('player_id', $id)
+                ->where('item_id', $itemId)
+                ->lockForUpdate()
                 ->first();
 
             //アイテムが存在する処理
@@ -110,15 +112,15 @@ class PlayersItemController extends Controller
 
                     for ($i = 0; $i < $count; $i++){
 
-                        if($playerSearch->hp >= 200 || $playerItem->count < $count){
+                        if($playerSearch->hp >= 200 || $playerItem->count <= 0){
 
                             $playerSearch->save();
                             break;
                         }
 
                         PlayerItems::where('player_id', $playerSearch->id)
-                        ->where('item_id', $itemSearch->id)
-                        ->Update(['count'=>$playerItem->count -= 1]);
+                                ->where('item_id', $itemSearch->id)
+                                ->Update(['count'=>$playerItem->count -= 1]);
                 
                         //回復させる。
                         $playerSearch->hp += $itemSearch->value;
@@ -164,7 +166,7 @@ class PlayersItemController extends Controller
 
                     for ($i = 0; $i < $count; $i++){
 
-                        if($playerSearch->mp >= 200 || $playerItem->count < $count){
+                        if($playerSearch->mp >= 200 || $playerItem->count <= 0){
 
                             $playerSearch->save();
                             break;
